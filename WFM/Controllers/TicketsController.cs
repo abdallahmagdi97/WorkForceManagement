@@ -300,6 +300,33 @@ namespace WFM.Controllers
                 _context.TicketSkills.Remove(ticketSkill);
             return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = "Ticket deleted successfully" });
         }
+        
+        // GET: api/Tickets/GetAllTicketStatus
+        [Route("GetAllTicketStatus")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Status>>> GetAllTicketStatus()
+        {
+            var statuses = await _context.Status.ToListAsync();
+            for (int i = 0; i < statuses.Count(); i++)
+            {
+                var tickets = await _context.Ticket.Where(t => t.StatusRefId == statuses[i].Id).ToArrayAsync();
+                statuses[i].Tickets = tickets.Length;
+            }
+            return statuses;
+        }
+        // GET: api/Tickets/GetAllTicketAreas
+        [Route("GetAllTicketAreas")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Area>>> GetAllTicketAreas()
+        {
+            var Areas = await _context.Area.ToListAsync();
+            for (int i = 0; i < Areas.Count(); i++)
+            {
+                var tickets = await _context.Ticket.Where(t => t.AreaRefId == Areas[i].Id).ToArrayAsync();
+                Areas[i].Tickets = tickets.Length;
+            }
+            return Areas;
+        }
 
         private bool TicketExists(int id)
         {
