@@ -46,7 +46,7 @@ namespace WFM.Controllers
 
                 foreach (var userRole in userRoles)
                 {
-                    authClaims.Add(new Claim(ClaimTypes.Role.Substring(ClaimTypes.Name.Length - 4), userRole));
+                    authClaims.Add(new Claim(ClaimTypes.Role.Substring(ClaimTypes.Role.Length - 4), userRole));
                 }
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
@@ -87,6 +87,24 @@ namespace WFM.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
+            if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            if (!await roleManager.RoleExistsAsync(UserRoles.User))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            if (!await roleManager.RoleExistsAsync(UserRoles.CallCenter))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.CallCenter));
+            if (!await roleManager.RoleExistsAsync(UserRoles.Manager))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
+            if (!await roleManager.RoleExistsAsync(UserRoles.Tech))
+                await roleManager.CreateAsync(new IdentityRole(UserRoles.Tech));
+            
+            if (await roleManager.RoleExistsAsync(model.Role))
+            {
+                await userManager.AddToRoleAsync(user, model.Role);
+            } else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! User role doesn't exist, please contact the System Admin for support." });
+            }
             return Ok(new Response { Status = "Success", Message = "User created successfully!" });
         }
 
