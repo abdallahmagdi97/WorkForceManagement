@@ -35,12 +35,13 @@ namespace WFM.Controllers
         public async Task<ActionResult<Area>> GetArea(int id)
         {
             var area = await _context.Area.FindAsync(id);
-
+            
             if (area == null)
             {
                 return NotFound();
             }
-
+            var tickets = await _context.Ticket.Where(t => t.AreaRefId == id).ToArrayAsync();
+            area.Tickets = tickets.Length;
             return area;
         }
 

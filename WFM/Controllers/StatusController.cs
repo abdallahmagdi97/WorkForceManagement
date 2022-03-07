@@ -41,7 +41,8 @@ namespace WFM.Controllers
             {
                 return NotFound();
             }
-
+            var tickets = await _context.Ticket.Where(t => t.StatusRefId == id).ToArrayAsync();
+            status.Tickets = tickets.Length;
             return status;
         }
 
