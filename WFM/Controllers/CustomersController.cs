@@ -118,6 +118,14 @@ namespace WFM.Controllers
               //  customers.RemoveAll(a => a)
             }
 
+            if (customers.Count == 0)
+            {
+                customers = await _context.Customer.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
+                for (int i = 0; i < customers.Count; i++)
+                {
+                    customers[i].Addresses = await _context.Address.Where(x => x.CustomerRefId == customers[i].Id).ToListAsync();
+                }
+            }
             return Ok(new PagedResponse<List<Customer>>(customers, validFilter.PageNumber, validFilter.PageSize, customers.Count()));
         }
         // GET: api/Customers/GetCustomerMeters/5

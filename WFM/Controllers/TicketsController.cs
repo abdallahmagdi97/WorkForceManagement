@@ -229,6 +229,42 @@ namespace WFM.Controllers
             return CreatedAtAction("GetTicket", new { id = ticket.Id }, ticket);
         }
 
+        // POST: api/Customer/QueryParam
+        [Route("SearchTickets")]
+        [HttpPost]
+        public async Task<ActionResult<IEnumerable<Ticket>>> SearchTicket([FromBody] Models.TicketSearchModel ticket, [FromQuery] PaginationFilter filter)
+        {
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            int customerId = 0;
+            int meterId = 0;
+            if (!string.IsNullOrEmpty(ticket.MeterNumber.TrimEnd()))
+            {
+                var meter = _context.Meter.Where(m => m.Number.Contains(ticket.MeterNumber)).FirstOrDefault();
+                meterId = meter.Id;
+            }
+            if (!string.IsNullOrEmpty(ticket.CustomerNationalId.TrimEnd()))
+            {
+                var customer = _context.Customer.Where(m => m.NationalID.Contains(ticket.CustomerNationalId)).FirstOrDefault();
+                customerId = customer.Id;
+            }
+            if (!string.IsNullOrEmpty(ticket.CustomerName.TrimEnd()))
+            {
+                var customer = _context.Customer.Where(m => m.Name.Contains(ticket.CustomerName)).FirstOrDefault();
+                customerId = customer.Id;
+            }
+            if (!string.IsNullOrEmpty(ticket.CustomerMobile.TrimEnd()))
+            {
+                var customer = _context.Customer.Where(m => m.Mobile.Contains(ticket.CustomerMobile)).FirstOrDefault();
+                customerId = customer.Id;
+            }
+            var tickets = await _context.Ticket.Where(t => t.CustomerRefId == customerId || t.MeterRefId == meterId).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
+            if (tickets.Count() == 0)
+            {
+                tickets = await _context.Ticket.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
+            }
+            return Ok(new PagedResponse<List<Ticket>>(tickets, validFilter.PageNumber, validFilter.PageSize, tickets.Count()));
+        }
+
         // DELETE: api/Tickets/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Ticket>> DeleteTicket(int id)
