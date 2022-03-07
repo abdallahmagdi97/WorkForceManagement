@@ -71,6 +71,7 @@ namespace WFM.Controllers
             }
             ticket.Skills = skills;
             ticket.Customer = await _context.Customer.FindAsync(ticket.CustomerRefId);
+            ticket.Customer.Addresses = await _context.Address.Where(a => a.CustomerRefId == ticket.CustomerRefId).ToListAsync();
             ticket.Meter = await _context.Meter.FindAsync(ticket.MeterRefId);
 
             return ticket;
