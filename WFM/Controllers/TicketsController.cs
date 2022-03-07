@@ -235,6 +235,11 @@ namespace WFM.Controllers
         public async Task<ActionResult<IEnumerable<Ticket>>> SearchTicket([FromBody] Models.TicketSearchModel ticket, [FromQuery] PaginationFilter filter)
         {
             var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            if (ticket == null)
+            {
+                var ticks = await _context.Ticket.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
+                return Ok(new PagedResponse<List<Ticket>>(ticks, validFilter.PageNumber, validFilter.PageSize, ticks.Count()));
+            }
             int customerId = 0;
             int meterId = 0;
             if (!string.IsNullOrEmpty(ticket.MeterNumber.TrimEnd()))
