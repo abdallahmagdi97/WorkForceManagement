@@ -70,6 +70,9 @@ namespace WFM.Controllers
                 }
             }
             ticket.Skills = skills;
+            ticket.Customer = await _context.Customer.FindAsync(ticket.CustomerRefId);
+            ticket.Meter = await _context.Meter.FindAsync(ticket.MeterRefId);
+
             return ticket;
         }
         // GET: api/Customers/GetStatusTickets/5
@@ -235,29 +238,29 @@ namespace WFM.Controllers
         public async Task<ActionResult<IEnumerable<Ticket>>> SearchTicket([FromBody] Models.TicketSearchModel ticket, [FromQuery] PaginationFilter filter)
         {
             var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
-            if (ticket == null)
+            if (ticket == null || (ticket.MeterNumber == null && ticket.CustomerMobile == null && ticket.CustomerName == null && ticket.CustomerNationalId== null))
             {
                 var ticks = await _context.Ticket.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 return Ok(new PagedResponse<List<Ticket>>(ticks, validFilter.PageNumber, validFilter.PageSize, ticks.Count()));
             }
             int customerId = 0;
             int meterId = 0;
-            if (!string.IsNullOrEmpty(ticket.MeterNumber.TrimEnd()))
+            if (!string.IsNullOrEmpty(ticket.MeterNumber))
             {
                 var meter = _context.Meter.Where(m => m.Number.Contains(ticket.MeterNumber)).FirstOrDefault();
                 meterId = meter.Id;
             }
-            if (!string.IsNullOrEmpty(ticket.CustomerNationalId.TrimEnd()))
+            if (!string.IsNullOrEmpty(ticket.CustomerNationalId))
             {
                 var customer = _context.Customer.Where(m => m.NationalID.Contains(ticket.CustomerNationalId)).FirstOrDefault();
                 customerId = customer.Id;
             }
-            if (!string.IsNullOrEmpty(ticket.CustomerName.TrimEnd()))
+            if (!string.IsNullOrEmpty(ticket.CustomerName))
             {
                 var customer = _context.Customer.Where(m => m.Name.Contains(ticket.CustomerName)).FirstOrDefault();
                 customerId = customer.Id;
             }
-            if (!string.IsNullOrEmpty(ticket.CustomerMobile.TrimEnd()))
+            if (!string.IsNullOrEmpty(ticket.CustomerMobile))
             {
                 var customer = _context.Customer.Where(m => m.Mobile.Contains(ticket.CustomerMobile)).FirstOrDefault();
                 customerId = customer.Id;

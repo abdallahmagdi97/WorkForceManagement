@@ -26,6 +26,10 @@ namespace WFM.Models
         public int StatusRefId { get; set; }
         public string Description { get; set; }
         [NotMapped]
+        public Customer Customer { get; internal set; }
+        [NotMapped]
+        public Meter Meter { get; internal set; }
+        [NotMapped]
         public List<int> Skills { get; set; }
         public DateTime LastUpdateDate { get; set; }
     }
