@@ -28,7 +28,13 @@ namespace WFM.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Status>>> GetStatus()
         {
-            return await _context.Status.ToListAsync();
+            var statuses = await _context.Status.ToListAsync();
+            for(int i=0; i<statuses.Count(); i++)
+            {
+                var tickets = await _context.Ticket.Where(t => t.StatusRefId == statuses[i].Id).ToArrayAsync();
+                statuses[i].Tickets = tickets.Length;
+            }
+            return statuses;
         }
 
         // GET: api/Status/5

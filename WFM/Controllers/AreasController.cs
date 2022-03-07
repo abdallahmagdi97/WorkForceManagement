@@ -27,7 +27,13 @@ namespace WFM.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Area>>> GetArea()
         {
-            return await _context.Area.ToListAsync();
+            var areas = await _context.Area.ToListAsync();
+            for (int i = 0; i < areas.Count(); i++)
+            {
+                var tickets = await _context.Ticket.Where(t => t.AreaRefId == areas[i].Id).ToArrayAsync();
+                areas[i].Tickets = tickets.Length;
+            }
+            return areas;
         }
 
         // GET: api/Areas/5
