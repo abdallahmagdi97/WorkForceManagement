@@ -189,6 +189,7 @@ namespace WFM.Controllers
                 ticket.Skills = new List<int>();
             }
             _context.Entry(ticket).State = EntityState.Modified;
+            _context.Entry(ticket).Property(x => x.CreationDate).IsModified = false;
             _context.TicketSkills.RemoveRange(_context.TicketSkills.Where(t => t.TicketRefId == id).ToArray());
             foreach (var skill in ticket.Skills)
             {
@@ -220,6 +221,11 @@ namespace WFM.Controllers
         [HttpPost]
         public async Task<ActionResult<Ticket>> PostTicket(Ticket ticket)
         {
+            var meter = await _context.Meter.FindAsync(ticket.MeterRefId);
+            if (ticket.CustomerRefId != meter.CustomerRefId)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "This Meter #"+meter.Id+" doesn't belong to the customer you selected." });
+            }
             ticket.CreationDate = DateTime.Now;
             _context.Ticket.Add(ticket);
             await _context.SaveChangesAsync();
