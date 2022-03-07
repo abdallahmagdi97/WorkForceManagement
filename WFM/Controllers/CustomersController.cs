@@ -53,12 +53,13 @@ namespace WFM.Controllers
         // POST: api/Customer/QueryParam
         [Route("SearchCustomers")]
         [HttpPost]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomer([FromBody] Models.CustomerSearchModel customer)
+        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomer([FromBody] Models.CustomerSearchModel customer, [FromQuery] PaginationFilter filter)
         {
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
             List<Customer> customers = new List<Customer>();
             if (!string.IsNullOrEmpty(customer.CustomerName))
             {
-                var customersFound = await _context.Customer.Where(c => c.Name.Contains(customer.CustomerName)).ToListAsync();
+                var customersFound = await _context.Customer.Where(c => c.Name.Contains(customer.CustomerName)).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 for (int i = 0; i < customersFound.Count(); i++)
                 {
                     customersFound[i].Addresses = await _context.Address.Where(x => x.CustomerRefId == customersFound[i].Id).ToListAsync();
@@ -67,7 +68,7 @@ namespace WFM.Controllers
             }
             if (!string.IsNullOrEmpty(customer.CustomerNationalId))
             {
-                var customersFound = await _context.Customer.Where(c => c.NationalID.Contains(customer.CustomerNationalId)).ToListAsync();
+                var customersFound = await _context.Customer.Where(c => c.NationalID.Contains(customer.CustomerNationalId)).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 for (int i = 0; i < customersFound.Count(); i++)
                 {
                     customersFound[i].Addresses = await _context.Address.Where(x => x.CustomerRefId == customersFound[i].Id).ToListAsync();
@@ -76,7 +77,7 @@ namespace WFM.Controllers
             }
             if (!string.IsNullOrEmpty(customer.CustomerNumber))
             {
-                var customersFound = await _context.Customer.Where(c => c.Number.Contains(customer.CustomerNumber)).ToListAsync();
+                var customersFound = await _context.Customer.Where(c => c.Number.Contains(customer.CustomerNumber)).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 for (int i = 0; i < customersFound.Count(); i++)
                 {
                     customersFound[i].Addresses = await _context.Address.Where(x => x.CustomerRefId == customersFound[i].Id).ToListAsync();
@@ -85,7 +86,7 @@ namespace WFM.Controllers
             }
             if (!string.IsNullOrEmpty(customer.CustomerMobileNumber))
             {
-                var customersFound = await _context.Customer.Where(c => c.Mobile.Contains(customer.CustomerMobileNumber)).ToListAsync();
+                var customersFound = await _context.Customer.Where(c => c.Mobile.Contains(customer.CustomerMobileNumber)).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 for (int i = 0; i < customersFound.Count(); i++)
                 {
                     customersFound[i].Addresses = await _context.Address.Where(x => x.CustomerRefId == customersFound[i].Id).ToListAsync();
@@ -116,8 +117,8 @@ namespace WFM.Controllers
                      .ToList();
               //  customers.RemoveAll(a => a)
             }
-            
-            return customers;
+
+            return Ok(new PagedResponse<List<Customer>>(customers, validFilter.PageNumber, validFilter.PageSize, customers.Count()));
         }
         // GET: api/Customers/GetCustomerMeters/5
         [Route("GetCustomerMeters/{id}")]
