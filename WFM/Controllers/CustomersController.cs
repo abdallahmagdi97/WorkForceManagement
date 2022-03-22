@@ -112,13 +112,15 @@ namespace WFM.Controllers
             if (customers.GroupBy(x => x).SelectMany(g => g.Skip(1)).Count() != 0)
             {
                 var customersToRemove = customers.GroupBy(x => x)
-                     .Where(g => g.Count() > 1)
-                     .SelectMany(g => g)
-                     .ToList();
-              //  customers.RemoveAll(a => a)
+                .Where(g => g.Count() > 1)
+                .SelectMany(g => g)
+                .ToList();
+                // customers.RemoveAll(a => a)
             }
 
-            if (customers.Count == 0)
+
+
+            if (customers.Count == 0 && string.IsNullOrEmpty(customer.CustomerMobileNumber) && string.IsNullOrEmpty(customer.CustomerNationalId) && string.IsNullOrEmpty(customer.CustomerNumber) && string.IsNullOrEmpty(customer.MeterNumber))
             {
                 customers = await _context.Customer.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 for (int i = 0; i < customers.Count; i++)

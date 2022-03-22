@@ -245,17 +245,18 @@ namespace WFM.Controllers
         public async Task<ActionResult<IEnumerable<Ticket>>> SearchTicket([FromBody] Models.TicketSearchModel ticket, [FromQuery] PaginationFilter filter)
         {
             var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
-            if (ticket == null || (ticket.MeterNumber == null && ticket.CustomerMobile == null && ticket.CustomerName == null && ticket.CustomerNationalId== null))
+            if (ticket == null || (ticket.MeterNumber == null && ticket.CustomerMobile == null && ticket.CustomerName == null && ticket.CustomerNationalId == null))
             {
                 var ticks = await _context.Ticket.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
                 return Ok(new PagedResponse<List<Ticket>>(ticks, validFilter.PageNumber, validFilter.PageSize, ticks.Count()));
             }
             int customerId = 0;
-            int meterId = 0;
+            List<int> meterId = new List<int>();
             if (!string.IsNullOrEmpty(ticket.MeterNumber))
             {
-                var meter = _context.Meter.Where(m => m.Number.Contains(ticket.MeterNumber)).FirstOrDefault();
-                meterId = meter.Id;
+                var meters = await _context.Meter.Where(m => m.Number.Contains(ticket.MeterNumber)).ToListAsync();
+                foreach (var meter in meters)
+                    meterId.Add(meter.Id);
             }
             if (!string.IsNullOrEmpty(ticket.CustomerNationalId))
             {
@@ -272,8 +273,8 @@ namespace WFM.Controllers
                 var customer = _context.Customer.Where(m => m.Mobile.Contains(ticket.CustomerMobile)).FirstOrDefault();
                 customerId = customer.Id;
             }
-            var tickets = await _context.Ticket.Where(t => t.CustomerRefId == customerId || t.MeterRefId == meterId).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
-            if (tickets.Count() == 0)
+            var tickets = await _context.Ticket.Where(t => t.CustomerRefId == customerId || meterId.Contains(t.MeterRefId)).Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
+            if (tickets.Count() == 0 && string.IsNullOrEmpty(ticket.CustomerName) && string.IsNullOrEmpty(ticket.CustomerMobile) && string.IsNullOrEmpty(ticket.MeterNumber) && string.IsNullOrEmpty(ticket.CustomerNationalId))
             {
                 tickets = await _context.Ticket.Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToListAsync();
             }

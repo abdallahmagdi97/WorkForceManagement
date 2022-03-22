@@ -10,6 +10,8 @@ using WFM.Models;
 using Microsoft.AspNetCore.Authorization;
 using WFM.Models.Filter;
 using WFM.Models.Wrappers;
+using System.IO;
+using OfficeOpenXml;
 
 namespace WFM.Controllers
 {
@@ -112,6 +114,35 @@ namespace WFM.Controllers
         private bool MeterExists(int id)
         {
             return _context.Meter.Any(e => e.Id == id);
+        }
+
+        public async void ImportMeters(IFormFile file)
+        {
+            var meters = new List<Meter>();
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                    var rowcount = worksheet.Dimension.Rows;
+                    for (int row = 2; row <= rowcount; row++)
+                    {
+                        meters.Add(new Meter
+                        {
+                            // Id = Convert.ToInt32(worksheet.Cells[row, 1].Value.ToString().Trim()),
+                            Number = worksheet.Cells[row, 2].Value.ToString().Trim(),
+                            // CustomerRefId = Convert.ToInt32(worksheet.Cells[row, 3].Value.ToString().Trim()),
+                        });
+                    }
+                }
+            }
+            
+            foreach(var meter in meters)
+            {
+                _context.Meter.Add(meter);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
