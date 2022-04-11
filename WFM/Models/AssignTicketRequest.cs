@@ -15,6 +15,10 @@ namespace WFM.Models
         public int TicketRefId { get; set; }
         [ForeignKey("Tech")]
         public int TechRefId { get; set; }
+        [ForeignKey("ApplicationUser")]
+        public int UserRefId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public bool IsApprovedByTech { get; set; }
         public bool IsForceAssigned { get; set; }
     }

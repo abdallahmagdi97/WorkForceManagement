@@ -91,3 +91,7 @@ C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\obj\Debug\netcoreapp3.1\WFM.pdb
 C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\obj\Debug\netcoreapp3.1\WFM.genruntimeconfig.cache
 C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\Humanizer.dll
 C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\EPPlus.dll
+C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\ExcelDataReader.dll
+C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\ExcelDataReader.DataSet.dll
+C:\Users\aedris\Desktop\New folder (4)\WFM\WFM\bin\Debug\netcoreapp3.1\System.Xml.XPath.XmlDocument.dll

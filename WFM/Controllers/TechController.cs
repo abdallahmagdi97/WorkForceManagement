@@ -174,6 +174,21 @@ namespace WFM.Controllers
             return Ok(new Response { Status = "Success", Message = "Tech user created successfully!" });
         }
 
+        // GET: api/Tech/GetAllTicketStatus/5
+        [Route("GetTechTicketStatus/{id}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Status>>> GetTechTicketStatus(int id)
+        {
+            var statuses = await _context.Status.ToListAsync();
+            for (int i = 0; i < statuses.Count(); i++)
+            {
+                var tickets = await _context.Ticket.Where(t => t.StatusRefId == statuses[i].Id).ToArrayAsync();
+                tickets = tickets.Where(t => t.TechRefId == id).ToArray();
+                statuses[i].Tickets = tickets.Length;
+            }
+            return statuses;
+        }
+
         // DELETE: api/Tech/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Tech>> DeleteTech(int id)

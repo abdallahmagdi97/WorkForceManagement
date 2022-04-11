@@ -11,6 +11,8 @@ namespace WFM.Models
         public string Number { get; set; }
         [ForeignKey("Customer")]
         public int CustomerRefId { get; set; }
+        [ForeignKey("Address")]
+        public int AddressRefId { get; set; }
         public DateTime InstallationDate { get; set; }
     }
 }

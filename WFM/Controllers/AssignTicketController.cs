@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using WFM.Models;
 
 namespace WFM.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AssignTicketController : ControllerBase
@@ -52,9 +54,9 @@ namespace WFM.Controllers
             {
                 return BadRequest();
             }
-
+            assignTicketRequest.UpdatedAt = DateTime.Now;
             _context.Entry(assignTicketRequest).State = EntityState.Modified;
-
+            _context.Entry(assignTicketRequest).Property(x => x.CreatedAt).IsModified = false;
             try
             {
                 await _context.SaveChangesAsync();
@@ -80,6 +82,7 @@ namespace WFM.Controllers
         [HttpPost]
         public async Task<ActionResult<AssignTicketRequest>> PostAssignTicketRequest(AssignTicketRequest assignTicketRequest)
         {
+            assignTicketRequest.CreatedAt = DateTime.Now;
             _context.AssignTicketRequest.Add(assignTicketRequest);
             await _context.SaveChangesAsync();
 
