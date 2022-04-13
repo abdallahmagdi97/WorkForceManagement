@@ -42,7 +42,7 @@ namespace WFM.Controllers
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserModel>> Get(int id)
+        public async Task<ActionResult<UserModel>> Get(string id)
         {
             var user = await _context.ApplicationUser.FindAsync(id);
             return new UserModel() { UserName = user.UserName, Role = user.Role };

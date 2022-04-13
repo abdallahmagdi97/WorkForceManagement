@@ -73,7 +73,7 @@ namespace WFM.Controllers
                 }
             }
 
-            return NoContent();
+            return StatusCode(StatusCodes.Status200OK, new Response { Status = "Success", Message = "Assign Ticket Request updated successfully" });
         }
 
         // POST: api/AssignTicket
