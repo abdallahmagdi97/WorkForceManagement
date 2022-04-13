@@ -83,6 +83,10 @@ namespace WFM.Controllers
         [HttpPost]
         public async Task<ActionResult<Area>> PostArea(Area area)
         {
+            if (_context.Area.Any(a => a.Name == area.Name))
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Area already exists" });
+            }
             _context.Area.Add(area);
             await _context.SaveChangesAsync();
 

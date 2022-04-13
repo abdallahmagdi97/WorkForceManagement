@@ -82,6 +82,10 @@ namespace WFM.Controllers
         [HttpPost]
         public async Task<ActionResult<Skill>> PostSkill(Skill skill)
         {
+            if (_context.Skill.Any(a => a.Name == skill.Name))
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Skill already exists" });
+            }
             _context.Skill.Add(skill);
             await _context.SaveChangesAsync();
 

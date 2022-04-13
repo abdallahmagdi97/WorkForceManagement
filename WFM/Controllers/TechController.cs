@@ -21,10 +21,12 @@ namespace WFM.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public TechController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public TechController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // GET: api/Tech
@@ -146,8 +148,11 @@ namespace WFM.Controllers
             _context.Tech.Add(tech);
             var userExists = await _userManager.FindByNameAsync(tech.Username);
             if (userExists != null)
+            {
+                _context.Tech.Remove(tech);
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Tech user already exists!" });
-
+            }
+                
             ApplicationUser user = new ApplicationUser()
             {
                 SecurityStamp = Guid.NewGuid().ToString(),
@@ -156,9 +161,16 @@ namespace WFM.Controllers
                 Role = "Tech"
             };
             var result = await _userManager.CreateAsync(user, tech.Password);
-            await _context.SaveChangesAsync();
             if (!result.Succeeded)
+            {
+                _context.Tech.Remove(tech);
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Tech user creation failed! Please check user details and try again." });
+            }
+                
+            if (await _roleManager.RoleExistsAsync(UserRoles.Tech))
+            {
+                await _userManager.AddToRoleAsync(user, UserRoles.Tech);
+            }
             if (tech.Areas != null)
             {
                 for (int i = 0; i < tech.Areas.Length; i++)
@@ -173,7 +185,6 @@ namespace WFM.Controllers
 
             return Ok(new Response { Status = "Success", Message = "Tech user created successfully!" });
         }
-
         // GET: api/Tech/GetAllTicketStatus/5
         [Route("GetTechTicketStatus/{id}")]
         [HttpGet]
